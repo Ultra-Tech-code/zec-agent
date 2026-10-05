@@ -7,21 +7,15 @@ agent activity on a transparent ledger.
 
 Built for the Zcash track at Colosseum's Worlds Fair hackathon.
 
-## Status: scaffold, not yet functional
+## Status: Functional (Ironwood/NU6)
 
-This repo is a **protocol and architecture scaffold**. The MCP server's tool surface, budget policy engine, and
-IPC contract with the signer are real and wired together. The signer
-itself (`rust-signer`) is stubbed — every place that needs real
-`zcash_client_backend` / `zcash_keys` / Zaino calls is marked with a
-`// TODO(zcash):` comment. See `docs/ARCHITECTURE.md` for why the pieces
-are split this way and what's a deliberate design tradeoff vs. a
-to-be-filled gap.
+This repo provides a fully integrated **protocol and architecture scaffold**. The MCP server's tool surface, budget policy engine, and IPC contract with the signer are wired together. The signer (`rust-signer`) is fully functional — using `zcash_client_sqlite` and `zcash_client_backend` to sync with a Zaino lightwalletd server, construct zero-knowledge proofs (Ironwood/Orchard), and broadcast shielded transactions to a local Zebra node. See `docs/ARCHITECTURE.md` for design tradeoffs.
 
 ## Layout
 
 ```
 mcp-server/   MCP server: budget policy engine + tool surface agents call
-rust-signer/  Sidecar holding the real Ironwood spending key (stubbed)
+rust-signer/  Sidecar holding the real Ironwood spending key
 sdk/          Thin TS client + reference agent example
 dashboard/    (not yet scaffolded) human-facing budget/audit view
 docs/         Architecture writeup
@@ -29,32 +23,48 @@ docs/         Architecture writeup
 
 ## Why this exists (vs. building on AxiomAI/Astrea)
 
-AxiomAI/Astrea (astrea-foundation on GitHub) is a vertically-integrated
-private-AI-inference product settled in ZEC — their own model, their own
-proxy, billed in ZEC. Their agent-budgets code, if it exists, is not
-public. This project is a different layer: generic, open infrastructure
-any agent framework can attach to via MCP, regardless of which model or
-company it's using. See `docs/ARCHITECTURE.md` for the full rationale.
+AxiomAI/Astrea (astrea-foundation on GitHub) is a vertically-integrated private-AI-inference product settled in ZEC. This project is a different layer: generic, open infrastructure any agent framework can attach to via MCP, regardless of which model or company it's using. See `docs/ARCHITECTURE.md` for the full rationale.
 
-## Getting started (once rust-signer is real)
+## Getting started
+
+Ensure you have a local Zebra node and Zaino instance running on testnet.
+
+### 1. Verify your Zebra Node RPC
+You can verify your Zebra node is responding on the testnet RPC port using this `curl` command (adjust the cookie path if you aren't on macOS):
+
+```bash
+curl -s --user "$(cat ~/Library/Caches/zebra/.cookie)" \
+  --data-binary '{"jsonrpc":"2.0","id":1,"method":"getinfo","params":[]}' \
+  -H 'content-type: application/json' http://127.0.0.1:18232/
+```
+
+**Expected Result:**
+```json
+{"jsonrpc":"2.0","id":1,"result":{"version":6040200,"build":"v6.4.2","subversion":"/Zebra:6.4.2/","protocolversion":170160,"blocks":4466571,"connections":23,"difficulty":4.730764719151816,"testnet":true,"paytxfee":0.0,"relayfee":1e-6,"errors":"getaddrs response hasn't been refreshed in some time","errorstimestamp":1791239517}}
+```
+
+### 2. Build and run the project
 
 ```bash
 # 1. build the signer
-cd rust-signer && cargo build --release
+cd rust-signer
+# Create a .env file with your testnet SEED_PHRASE
+cargo build
 
-# 2. build and run the MCP server
-cd ../mcp-server && npm install && npm run build && npm start
+# 2. build the MCP server
+cd ../mcp-server
+npm install
+npm run build
 
-# 3. try the reference agent
-cd ../sdk && npm install && npm run build
-npx tsx examples/reference-agent.ts
+# 3. try the reference agent end-to-end (MCP -> SDK -> rust-signer -> network)
+cd ../sdk
+npm install
+npm run build
+ZEBRA_RPC_URL="http://127.0.0.1:18232" npx tsx examples/reference-agent.ts
 ```
 
-## Next steps (see docs/ARCHITECTURE.md for the full plan)
+## Next steps
 
-1. Replace every `TODO(zcash)` in `rust-signer/src/main.rs` with real
-   Zaino sync + Ironwood balance/send calls; prove it standalone via CLI
-   before wiring to the MCP server
-2. Wire `derive_subaccount` to real ZIP 32 child derivation
-3. Add human-approval flow (currently only queues; nothing resolves it)
-4. Dashboard: read-only viewing-key-scanned history view first
+1. Wire `derive_subaccount` to real ZIP 32 child derivation
+2. Add human-approval flow (currently only queues; nothing resolves it)
+3. Dashboard: read-only viewing-key-scanned history view first
