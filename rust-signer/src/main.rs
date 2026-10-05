@@ -255,7 +255,7 @@ async fn send(
         &selector,
         &change_strategy,
         req,
-        ConfirmationsPolicy::default(),
+        ConfirmationsPolicy::new_symmetrical(std::num::NonZeroU32::new(1).unwrap(), false),
         &SpendPolicy::default(),
         None,
         None,
@@ -295,7 +295,7 @@ async fn send(
     let mut raw_tx = Vec::new();
     tx.write(&mut raw_tx).map_err(|e| anyhow::anyhow!("failed to serialize tx: {}", e))?;
 
-    let rpc_url = std::env::var("ZEBRA_RPC_URL").unwrap_or_else(|_| "http://127.0.0.1:8232".to_string());
+    let rpc_url = std::env::var("ZEBRA_RPC_URL").unwrap_or_else(|_| "http://127.0.0.1:18232".to_string());
     let confirmed_txid = broadcast_tx(&raw_tx, &rpc_url).await
         .map_err(|e| anyhow::anyhow!("failed to broadcast tx: {}", e))?;
 
