@@ -1,0 +1,17 @@
+{
+  "name": "@zec-agent-budget/sdk",
+  "version": "0.1.0",
+  "description": "Thin client for agent frameworks to spend from a constrained ZEC budget via the zec-agent-budget MCP server.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "@zec-agent-budget/mcp-server",
+  "version": "0.1.0",
+  "description": "MCP server exposing constrained ZEC agent budgets, backed by Ironwood shielded sub-accounts.",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "zec-budget-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "better-sqlite3": "^11.0.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.0",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
