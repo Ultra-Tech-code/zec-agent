@@ -63,6 +63,35 @@ npm run build
 ZEBRA_RPC_URL="http://127.0.0.1:18232" npx tsx examples/reference-agent.ts
 ```
 
+### 3. Manual Testing via CLI
+
+You can bypass the MCP server and interact directly with the Rust signer sidecar via JSON-over-stdio to query balances, manually build/broadcast a transaction, or check internal state.
+
+**Note:** Ensure you are in the `rust-signer` directory.
+
+**Check Wallet Balance:**
+```bash
+echo '{"id": "1", "method": "get_balance", "params": {"sub_account_index": 0}}' | cargo run -q --bin rust-signer -- --network testnet
+```
+
+**Send a test transaction:**
+```bash
+# Agent Testnet Address: utest1vpmwkhhk9tfcc5q48xy8nwzwwtxn7fskw97spyqkkat06ze6ffgvjsuf84r6c94u0ejuwxhh99jttrklx4wf2ancwv2uf6h0hx9n9v2vnsy3g5k8za2fh4nspaszteu6djlh2rywz8velsh2xl27enuux3s62cl065zl94kxg05t9st4zv4w4vleq6kvxses79jye6pncrjcsanngc2
+# Target Wallet Address: utest1vs5pqe2ylczkyp4ape3pwpsjfuy86kp8mknukcday6a9emrafhuagtcjdvxvc4vstr4fg3sgwanyq393z2y3t9jz0uvhv0vfkry8tcan20lj89922ggv2nrn0zkxjcf34ufahymh7g6wdaqwk6nvka3wexrs73fhtatp6h50lsq4shkr
+
+echo '{"id": "2", "method": "send", "params": {"amount_zatoshi": "50000", "destination_address": "utest1vs5pqe2ylczkyp4ape3pwpsjfuy86kp8mknukcday6a9emrafhuagtcjdvxvc4vstr4fg3sgwanyq393z2y3t9jz0uvhv0vfkry8tcan20lj89922ggv2nrn0zkxjcf34ufahymh7g6wdaqwk6nvka3wexrs73fhtatp6h50lsq4shkr"}}' | ZEBRA_RPC_URL="http://127.0.0.1:18232" cargo run -q --bin rust-signer -- --network testnet
+```
+
+**Expected Send Result:**
+```json
+{"id":"2","ok":true,"result":{"note":"Transaction successfully broadcasted to network","stub":false,"txid":"72bbd29a98d1d8085835abaef2d9fd19b8bddc7519f38f99b56c34379874d15b"}}
+```
+
+**Verify local state in SQLite:**
+```bash
+sqlite3 wallet.sqlite "SELECT count(*) as pending_scan FROM scan_queue;" && sqlite3 wallet.sqlite "SELECT witness_stabilized, count(*) FROM ironwood_received_notes GROUP BY witness_stabilized;"
+```
+
 ## Next steps
 
 1. Wire `derive_subaccount` to real ZIP 32 child derivation
