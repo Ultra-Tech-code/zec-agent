@@ -163,7 +163,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         "sent",
         txid
       );
-      return { content: [{ type: "text", text: JSON.stringify({ allowed: true, txid }) }] };
+      return { content: [{ type: "text", text: JSON.stringify({ allowed: true, sent: true, txid }) }] };
     } catch (err) {
       budget.recordSpend(
         {
